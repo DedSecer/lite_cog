@@ -6,7 +6,7 @@ import tf2_ros
 import tf.transformations as tft
 import numpy as np
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import TransformStamped
+from geometry_msgs.msg import TransformStamped, PoseWithCovarianceStamped
 from std_srvs.srv import Empty, EmptyResponse
 
 
@@ -23,22 +23,64 @@ class OdomToTfNode:
         self.offset_z = 0.0
         self.offset_yaw = 0.0
         
+        # Initial pose in map frame (set via parameter or initialpose topic)
+        self.init_pos_x = rospy.get_param('~init_pos_x', 0.0)
+        self.init_pos_y = rospy.get_param('~init_pos_y', 0.0)
+        self.init_pos_z = rospy.get_param('~init_pos_z', 0.0)
+        self.init_yaw = rospy.get_param('~init_yaw', 0.0)
+        
         # Store the last received odometry for reset
         self.last_odom = None
         
         # Reset service
         self.reset_srv = rospy.Service('~reset_odom', Empty, self.reset_callback)
         
+        # Subscribe to /initialpose topic (from rviz "2D Pose Estimate")
+        self.initialpose_sub = rospy.Subscriber('/initialpose', PoseWithCovarianceStamped, self.initialpose_callback)
+        
         # Subscribe to /leg_odom2 topic
         self.odom_sub = rospy.Subscriber('/leg_odom2', Odometry, self.odom_callback)
         
         rospy.loginfo("odom_to_tf_node started, subscribing to /leg_odom2")
-        rospy.loginfo("Call service '~reset_odom' to reset odometry to origin")
+        rospy.loginfo("Initial pose: x=%.3f, y=%.3f, yaw=%.3f", self.init_pos_x, self.init_pos_y, self.init_yaw)
+        rospy.loginfo("Use rviz '2D Pose Estimate' or service '~reset_odom' to set position")
+
+    def initialpose_callback(self, msg):
+        """
+        Callback for /initialpose topic (from rviz 2D Pose Estimate).
+        Sets the current position to the specified pose in map frame.
+        """
+        if self.last_odom is None:
+            rospy.logwarn("No odometry data received yet, cannot set initial pose")
+            return
+        
+        # Get target pose from message
+        target_x = msg.pose.pose.position.x
+        target_y = msg.pose.pose.position.y
+        target_z = msg.pose.pose.position.z
+        q = msg.pose.pose.orientation
+        _, _, target_yaw = tft.euler_from_quaternion([q.x, q.y, q.z, q.w])
+        
+        # Update initial pose
+        self.init_pos_x = target_x
+        self.init_pos_y = target_y
+        self.init_pos_z = target_z
+        self.init_yaw = target_yaw
+        
+        # Record current odometry as offset
+        self.offset_x = self.last_odom.pose.pose.position.x
+        self.offset_y = self.last_odom.pose.pose.position.y
+        self.offset_z = self.last_odom.pose.pose.position.z
+        q_odom = self.last_odom.pose.pose.orientation
+        _, _, self.offset_yaw = tft.euler_from_quaternion([q_odom.x, q_odom.y, q_odom.z, q_odom.w])
+        
+        rospy.loginfo("Initial pose set to: x=%.3f, y=%.3f, z=%.3f, yaw=%.3f",
+                      target_x, target_y, target_z, target_yaw)
 
     def reset_callback(self, req):
         """
         Service callback to reset odometry.
-        Records the current position as offset so that current position becomes origin.
+        Records the current position as offset so that current position becomes the initial pose.
         """
         if self.last_odom is not None:
             self.offset_x = self.last_odom.pose.pose.position.x
@@ -50,8 +92,8 @@ class OdomToTfNode:
             _, _, yaw = tft.euler_from_quaternion([q.x, q.y, q.z, q.w])
             self.offset_yaw = yaw
             
-            rospy.loginfo("Odometry reset! Offset: x=%.3f, y=%.3f, z=%.3f, yaw=%.3f",
-                          self.offset_x, self.offset_y, self.offset_z, self.offset_yaw)
+            rospy.loginfo("Odometry reset! Current pose set to initial pose: x=%.3f, y=%.3f, yaw=%.3f",
+                          self.init_pos_x, self.init_pos_y, self.init_yaw)
         else:
             rospy.logwarn("No odometry data received yet, cannot reset")
         
@@ -75,10 +117,18 @@ class OdomToTfNode:
         cos_offset = np.cos(-self.offset_yaw)
         sin_offset = np.sin(-self.offset_yaw)
         
-        new_x = dx * cos_offset - dy * sin_offset
-        new_y = dx * sin_offset + dy * cos_offset
-        new_z = msg.pose.pose.position.z - self.offset_z
-        new_yaw = current_yaw - self.offset_yaw
+        # Transform to initial pose frame, then add initial position
+        rotated_x = dx * cos_offset - dy * sin_offset
+        rotated_y = dx * sin_offset + dy * cos_offset
+        
+        # Apply initial pose rotation to get final position
+        cos_init = np.cos(self.init_yaw)
+        sin_init = np.sin(self.init_yaw)
+        
+        new_x = self.init_pos_x + rotated_x * cos_init - rotated_y * sin_init
+        new_y = self.init_pos_y + rotated_x * sin_init + rotated_y * cos_init
+        new_z = self.init_pos_z + msg.pose.pose.position.z - self.offset_z
+        new_yaw = self.init_yaw + (current_yaw - self.offset_yaw)
         
         # Create new quaternion from adjusted yaw (keeping roll and pitch from original)
         roll, pitch, _ = tft.euler_from_quaternion([q.x, q.y, q.z, q.w])
