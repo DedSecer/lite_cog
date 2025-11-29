@@ -1,0 +1,7 @@
+start logging
+-----new round-----
+realsense is down
+voa not active
+bytes send12
+ip: 192.168.1.120
+port: 43897
