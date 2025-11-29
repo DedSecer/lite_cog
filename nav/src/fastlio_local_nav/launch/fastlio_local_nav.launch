@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- ============================================ -->
+  <!--                   参数配置                    -->
+  <!-- ============================================ -->
+  <arg name="map_name" default="lite3" />
+  <arg name="open_rviz" default="true" />
+  
+  <!-- 初始位置偏移（Fast-LIO 坐标系相对于 map 的偏移） -->
+  <arg name="init_x" default="0.0" />
+  <arg name="init_y" default="0.0" />
+  <arg name="init_z" default="0.0" />
+  <arg name="init_yaw" default="0.0" />
+
+  <!-- ============================================ -->
+  <!--   Fast-LIO 发布 odom -> base_link TF         -->
+  <!--   动态 TF 节点发布 map -> odom，支持 initialpose    -->
+  <!-- ============================================ -->
+  
+  <!-- 动态 map -> odom TF 发布节点，订阅 /initialpose 设置初始位置 -->
+  <node pkg="fastlio_local_nav" type="map_to_odom_tf.py" name="map_to_odom_tf" output="screen">
+    <param name="init_x" value="$(arg init_x)" />
+    <param name="init_y" value="$(arg init_y)" />
+    <param name="init_z" value="$(arg init_z)" />
+    <param name="init_yaw" value="$(arg init_yaw)" />
+    <param name="publish_rate" value="50.0" />
+  </node>
+
+  <!-- ============================================ -->
+  <!--                  地图服务                     -->
+  <!-- ============================================ -->
+  <!-- 加载2D栅格地图用于全局规划 -->
+  <node name="MapServer" pkg="map_server" type="map_server" args="/home/ysc/lite_cog/system/map/$(arg map_name).yaml"/>
+
+  <!-- ============================================ -->
+  <!--                   导航系统                    -->
+  <!-- ============================================ -->
+  <include file="$(find navigation)/launch/navigation.launch"/>
+
+  <!-- ============================================ -->
+  <!--                   可视化                      -->
+  <!-- ============================================ -->
+  <node name="rviz" pkg="rviz" type="rviz" required="true" 
+        args="-d $(find fastlio_local_nav)/rviz/fastlio_local_nav.rviz" 
+        if="$(arg open_rviz)" /> 
+</launch>

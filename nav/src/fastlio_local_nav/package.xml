@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>fastlio_local_nav</name>
+    <version>0.1.0</version>
+    <description>Navigation package using Fast-LIO for localization</description>
+    <license>MIT</license>
+    <maintainer email="user@example.com">User</maintainer>
+    <author email="user@example.com">User</author>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <exec_depend>rospy</exec_depend>
+    <exec_depend>tf2_ros</exec_depend>
+    <exec_depend>nav_msgs</exec_depend>
+    <exec_depend>geometry_msgs</exec_depend>
+    <exec_depend>std_srvs</exec_depend>
+    <exec_depend>faster_lio</exec_depend>
+    <exec_depend>map_server</exec_depend>
+    <exec_depend>navigation</exec_depend>
+</package>
