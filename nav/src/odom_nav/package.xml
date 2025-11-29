@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>odom_nav</name>
+    <version>0.1.0</version>
+    <description>Odometry to TF transformer package</description>
+    <license>MIT</license>
+    <maintainer email="user@example.com">User</maintainer>
+    <author email="user@example.com">User</author>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <exec_depend>rospy</exec_depend>
+    <exec_depend>tf2_ros</exec_depend>
+    <exec_depend>nav_msgs</exec_depend>
+    <exec_depend>geometry_msgs</exec_depend>
+</package>
