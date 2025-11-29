@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- arguments -->
+  <arg name="map_name" default="lite3" />
+  <arg name="points_topic" default="/rslidar_points" />
+  <arg name="open_rviz" default="true" />
+
+  <!-- 加载2D栅格地图用于全局规划 -->
+  <node name="MapServer" pkg="map_server" type="map_server" args="/home/ysc/lite_cog/system/map/$(arg map_name).yaml"/>
+
+
+  <node name="odom_to_tf_node" pkg="odom_nav" type="odom_to_tf.py" output="screen"/>
+
+
+  <include file="$(find navigation)/launch/navigation.launch"/>
+
+
+  <node name="rviz" pkg="rviz" type="rviz" required="true" args="-d $(find odom_nav)/rviz/odom_nav.rviz" if="$(arg open_rviz)" /> 
+</launch>
