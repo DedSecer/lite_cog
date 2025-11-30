@@ -25,7 +25,7 @@ sleep 3
 
 # 启动导航系统（在新终端）
 gnome-terminal --title="FastLIO Navigation" -- bash -c "
-source /home/ysc/lite_cog/nav/devel/setup.bash
+source /home/ysc/coffee_ws/devel/setup.bash
 roslaunch fastlio_local_nav fastlio_local_nav.launch \
     map_name:=$MAP_NAME \
     init_x:=$INIT_X \
