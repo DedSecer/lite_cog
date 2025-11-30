@@ -63,13 +63,13 @@ stvl_obstacle_layer:
     clear_after_reading: false    #default false, clear the buffer after the layer gets readings from it
     enabled: true
     model_type: 1
-    obstacle_range: 3.0           #meters
+    obstacle_range: 10.0           #meters
 
 sob_layer:
   enabled: true
   inflate_unknown: false
   inscribed_radius: 0.15
-  inflation_radius: 0.45
+  inflation_radius: 0.6
   cost_scaling_factor: 10
 
 
