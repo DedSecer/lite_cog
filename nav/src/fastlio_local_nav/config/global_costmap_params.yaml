@@ -1,10 +1,28 @@
+# ============================================
+# Global Costmap 参数
+# 全局代价地图 - 用于全局路径规划
+# ============================================
 
+global_frame: map
+robot_base_frame: base_link
+rolling_window: true
+track_unknown_space: false
+always_send_full_costmap: false
+
+# 地图尺寸
 width: 500
 height: 500
+resolution: 0.1
+origin_x: 0
+origin_y: 0
 
+# 更新频率 - 全局地图更新较慢，减少计算负担
+update_frequency: 2.0
+publish_frequency: 1.0
+transform_tolerance: 1.0
+
+# 插件列表
 plugins:
   - {name: static_layer, type: "costmap_2d::StaticLayer"} 
   # - {name: stvl_obstacle_layer, type: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"}
-  - {name: sob_layer,  type: "sob_layer::SobLayer"}
-  # - {name: voxel_layer, type: "costmap_2d::VoxelLayer"}    
-  # - {name: inflation_layer, type: "costmap_2d::InflationLayer"}  
+  - {name: sob_layer,  type: "sob_layer::SobLayer"}  

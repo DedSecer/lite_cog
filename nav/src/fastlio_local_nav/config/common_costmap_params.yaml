@@ -1,21 +1,13 @@
 
-# from source code
-global_frame: map
-robot_base_frame: base_link
-rolling_window: true
-track_unknown_space: false
-always_send_full_costmap: false
+# ============================================
+# 共享参数 - 被 global 和 local costmap 共用
+# ============================================
 
-# from cfg file
-transform_tolerance: 1.0
-update_frequency: 10
-publish_frequency: 5
-resolution: 0.1
-origin_x: 0
-origin_y: 0
+# 机器人 footprint
 footprint: [[-0.3, -0.2], [-0.3, 0.2], [0.3, 0.2], [0.3, -0.2]]
 footprint_padding: 0.1
 
+# 静态地图层 (仅用于 global costmap)
 static_layer:
   map_topic: map
   first_map_only: true
@@ -26,6 +18,7 @@ static_layer:
   unknown_cost_value: -1
   trinary_costmap: true
 
+# STVL 障碍物层
 stvl_obstacle_layer:
   observation_sources:   rslidar_points
   transform_tolerance:   1.0    # seconds  
@@ -65,6 +58,7 @@ stvl_obstacle_layer:
     model_type: 1
     obstacle_range: 10.0           #meters
 
+# SOB 膨胀层
 sob_layer:
   enabled: true
   inflate_unknown: false
