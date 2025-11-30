@@ -17,7 +17,7 @@ echo "=========================================="
 # 启动 Fast-LIO 定位（在新终端）
 gnome-terminal --title="Fast-LIO Localization" -- bash -c "
 source /home/ysc/lite_cog/slam/devel/setup.bash
-roslaunch faster_lio localization_c16.launch rviz:=false
+roslaunch faster_lio mapping_c16.launch rviz:=false
 read -p 'Press any key to exit...'
 "
 
