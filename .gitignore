@@ -3,6 +3,7 @@ __pycache__/
 build/
 devel/
 install/
+log/
 
 .vscode/
 .VSCodeCounter/
