@@ -5,6 +5,7 @@ devel/
 install/
 
 .vscode/
+.VSCodeCounter/
 .idea/
 
 .DS_Store

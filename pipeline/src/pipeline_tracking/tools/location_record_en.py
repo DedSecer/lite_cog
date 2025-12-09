@@ -56,6 +56,7 @@ class LocationRecorder(QWidget):
 
         self.text_content = QTextEdit()
         self.text_content.setReadOnly(True)
+        self.even_low_speed_radio_button.setChecked(True)
 
         self.record_layout = QHBoxLayout()
         self.receive_button = QPushButton("get location")

@@ -33,7 +33,7 @@ while break_flag != True:
     # show final img
     #################
     cv2.imshow("DR People Tracking", final_frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    if cv2.waitKey(1) & 0xFF == 27:
         break
 
 gstreamer_wrapper.StopThread()
